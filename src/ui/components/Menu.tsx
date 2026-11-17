@@ -1,5 +1,6 @@
 'use client';
 
+import { deckCopies } from '@/lib/settings';
 import type { Settings } from '@/lib/settings';
 import { CardView } from './CardView';
 
@@ -31,9 +32,9 @@ export function Menu({ settings, onChange, onStart, onRules }: Props) {
     <main className="menu">
       <div className="menu-hero">
         <div className="menu-cards" aria-hidden>
-          <CardView character="hacker" size="md" />
-          <CardView size="md" />
-          <CardView character="ia" size="md" />
+          <CardView character="hacker" size="lg" />
+          <CardView size="lg" />
+          <CardView character="ia" size="lg" />
         </div>
         <h1 className="title">
           COUP<span className="title-sub">DEV EDITION</span>
@@ -82,6 +83,19 @@ export function Menu({ settings, onChange, onStart, onRules }: Props) {
           {settings.iaMode === 'balanced'
             ? 'Prompt custa 1 token extra. Depois de 2 usos, a IA volta ao baralho.'
             : 'Prompt grátis. Depois de usar, a IA é revelada e embaralhada de volta.'}
+        </p>
+        <Segmented
+          label="baralho"
+          value={settings.deck}
+          options={[
+            ['classic', 'clássico'],
+            ['scaled', 'proporcional'],
+          ]}
+          onChange={(v) => set('deck', v)}
+        />
+        <p className="hint">
+          {settings.deck === 'classic' ? '3 cópias de cada personagem, com qualquer número de jogadores.' : 'Cópias de cada personagem = jogadores − 1.'} Nesta
+          partida: {deckCopies(settings)} de cada + 1 IA = {deckCopies(settings) * 5 + 1} cartas.
         </p>
         <div className="checks">
           <label className="toggle">

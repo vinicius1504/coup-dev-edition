@@ -1,3 +1,4 @@
+import { COPIES_PER_CHARACTER } from './constants';
 import type { GameState, GameView, Phase, PlayerId } from './types';
 
 /** Estado visto por `viewer`: sem cartas ocultas alheias, sem baralho, sem eventos privados. */
@@ -7,6 +8,7 @@ export function toView(state: GameState, viewer: PlayerId): GameView {
   return structuredClone({
     viewer,
     iaMode: state.config.iaMode,
+    copies: state.config.copies ?? COPIES_PER_CHARACTER,
     players: state.players.map((p) => ({
       id: p.id,
       name: p.name,

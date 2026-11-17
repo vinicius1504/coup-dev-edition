@@ -8,6 +8,7 @@ import { useGame } from '../hooks/useGame';
 import { bubbleFor } from '../text';
 import { ActionPanel } from './ActionPanel';
 import type { Choice } from './ActionPanel';
+import { DeckTracker } from './DeckTracker';
 import { EventLog } from './EventLog';
 import { ResponseModal } from './ResponseModal';
 import { Rules } from './Rules';
@@ -152,6 +153,8 @@ export function Game({ config, timer, sound, onToggleSound, onFinish, onQuit }: 
           </div>
         </main>
         <aside className="game-side">
+          <h2 className="side-title">~/baralho</h2>
+          <DeckTracker view={view} />
           <h2 className="side-title">~/log</h2>
           <EventLog log={view.log} name={name} />
         </aside>

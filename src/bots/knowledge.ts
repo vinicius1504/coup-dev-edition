@@ -1,7 +1,7 @@
-import { ACTIONS, COPIES_PER_CHARACTER, DECK_SIZE } from '@/engine/constants';
+import { ACTIONS, BASE_CHARACTERS } from '@/engine/constants';
 import type { Character, GameView, PlayerId, PlayerView } from '@/engine/types';
 
-export const copiesOf = (c: Character): number => (c === 'ia' ? 1 : COPIES_PER_CHARACTER);
+export const copiesOf = (v: GameView, c: Character): number => (c === 'ia' ? 1 : v.copies);
 
 export const me = (v: GameView): PlayerView => v.players.find((p) => p.id === v.viewer)!;
 export const player = (v: GameView, id: PlayerId): PlayerView => v.players.find((p) => p.id === id)!;
@@ -22,7 +22,7 @@ function seen(v: GameView): Character[] {
 }
 
 export function unseenCopies(v: GameView, c: Character): number {
-  return copiesOf(c) - seen(v).filter((x) => x === c).length;
+  return copiesOf(v, c) - seen(v).filter((x) => x === c).length;
 }
 
 /** Probabilidade a priori de `id` ter ao menos uma cópia de `c` (contagem de cartas). */
@@ -30,7 +30,7 @@ export function probHolds(v: GameView, id: PlayerId, c: Character): number {
   const k = unseenCopies(v, c);
   if (k <= 0) return 0;
   const n = liveCount(player(v, id));
-  const unseenTotal = DECK_SIZE - seen(v).length;
+  const unseenTotal = BASE_CHARACTERS.length * v.copies + 1 - seen(v).length;
   let pNone = 1;
   for (let i = 0; i < n; i++) pNone *= Math.max(0, unseenTotal - k - i) / (unseenTotal - i);
   return 1 - pNone;

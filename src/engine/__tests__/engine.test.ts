@@ -473,3 +473,24 @@ describe('regras de borda e fim de jogo', () => {
     }
   });
 });
+
+describe('baralho proporcional', () => {
+  const scaled = (n: number, copies: number) =>
+    createGame({ players: Array.from({ length: n }, (_, i) => ({ name: `P${i}`, kind: 'human' as const })), iaMode: 'balanced', seed: 3, copies });
+
+  it('usa o número de cópias pedido e sempre 1 IA', () => {
+    for (const n of [2, 3, 4, 5, 6]) {
+      const s = scaled(n, n - 1);
+      const all = [...s.deck, ...s.players.flatMap((p) => p.influences.map((i) => i.card))];
+      expect(all).toHaveLength(5 * (n - 1) + 1);
+      expect(all.filter((c) => c.character === 'ia')).toHaveLength(1);
+      expect(all.filter((c) => c.character === 'qa')).toHaveLength(n - 1);
+      expect(toView(s, 'p0').copies).toBe(n - 1);
+    }
+  });
+
+  it('rejeita baralho pequeno demais para distribuir as mãos', () => {
+    expect(() => scaled(6, 2)).toThrow();
+    expect(() => scaled(3, 0)).toThrow();
+  });
+});

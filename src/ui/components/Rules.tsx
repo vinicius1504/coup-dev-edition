@@ -46,7 +46,7 @@ export function Rules({ initialTab, onClose, closeLabel }: { initialTab: RulesTa
         {tab === 'tutorial' && (
           <ol className="steps">
             <li>
-              <b>Objetivo.</b> Você começa com 2 cartas (influências) viradas para baixo e 2 tokens. Vence quem for o último com pelo menos 1 carta.
+              <b>Objetivo.</b> O baralho tem 3 cópias de cada personagem (ou jogadores − 1, no baralho proporcional) mais 1 IA. Você começa com 2 cartas (influências) viradas para baixo e 2 tokens. Vence quem for o último com pelo menos 1 carta.
             </li>
             <li>
               <b>No seu turno, escolha 1 ação.</b> Ações gerais não precisam de carta. Ações de personagem exigem que você <i>alegue</i> ter a carta. Você pode
@@ -75,7 +75,7 @@ export function Rules({ initialTab, onClose, closeLabel }: { initialTab: RulesTa
               const ab = ABILITIES[c];
               return (
                 <article className="char" key={c} style={{ ['--c' as string]: def.color }}>
-                  <CardView character={c} size="md" />
+                  <CardView character={c} size="lg" />
                   <div>
                     <h3>
                       {def.name} <small>({def.role}, {ab.copies})</small>

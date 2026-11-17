@@ -54,6 +54,8 @@ export interface GameConfig {
   iaMode: IaMode;
   /** Semente do RNG: mesma semente + mesmos comandos = mesma partida. */
   seed: number;
+  /** Cópias de cada personagem no baralho (padrão 3). A IA é sempre única. */
+  copies?: number;
   /** Índice de quem joga primeiro (padrão 0). */
   firstPlayer?: number;
 }
@@ -238,6 +240,8 @@ export interface PlayerView {
 export interface GameView {
   viewer: PlayerId;
   iaMode: IaMode;
+  /** Cópias de cada personagem no baralho desta partida. */
+  copies: number;
   players: PlayerView[];
   deckCount: number;
   turn: number;

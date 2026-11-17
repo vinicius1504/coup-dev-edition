@@ -119,19 +119,68 @@ b { color: #fff; }
     var(--bg-3);
   color: var(--accent);
 }
-.card-glyph { font-weight: 700; font-size: calc(var(--w) * 0.3); text-shadow: 2px 2px 0 #000; }
+.card-glyph { font-weight: 700; font-size: calc(var(--w) * 0.26); text-shadow: 2px 2px 0 #000; white-space: nowrap; }
+.card-cursor { animation: cursor 1s steps(1) infinite; }
+@keyframes cursor { 50% { opacity: 0; } }
+.card-back::before, .card-back::after {
+  content: '';
+  position: absolute;
+  width: calc(var(--w) * 0.09);
+  height: calc(var(--w) * 0.09);
+  background: var(--accent);
+  opacity: 0.55;
+}
+.card-back::before { top: 8%; left: 10%; }
+.card-back::after { bottom: 8%; right: 10%; }
 .card-front {
   transform: rotateY(180deg);
-  background: linear-gradient(to bottom, color-mix(in srgb, var(--c) 22%, var(--bg-2)) 0 55%, var(--bg-2) 55%);
+  justify-content: flex-start;
+  gap: 0;
+  background: var(--bg-2);
   border-color: var(--c);
   color: var(--c);
-  padding: 2px;
   text-align: center;
 }
-.card-icon { font-size: calc(var(--w) * 0.34); font-weight: 700; line-height: 1; text-shadow: 2px 2px 0 #000; white-space: nowrap; }
-.card-name { font-size: calc(var(--w) * 0.135); font-weight: 700; color: #fff; line-height: 1.1; }
-.card-role { font-size: calc(var(--w) * 0.115); color: var(--dim); line-height: 1.1; }
-.card.is-dead { filter: grayscale(1) brightness(0.55); }
+.card-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  flex: none;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(0, 0, 0, 0.18) 3px 4px),
+    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--c) 42%, #0b0f16), color-mix(in srgb, var(--c) 10%, #0b0f16) 75%);
+  border-bottom: 2px solid var(--c);
+}
+.sprite { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.sprite.is-animated .sprite-f1 { animation: frame-a 1.6s steps(1) infinite; }
+.sprite.is-animated .sprite-f2 { animation: frame-b 1.6s steps(1) infinite; }
+@keyframes frame-a { 0% { opacity: 1; } 70% { opacity: 0; } }
+@keyframes frame-b { 0% { opacity: 0; } 70% { opacity: 1; } }
+.card-name {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 2px;
+  font-size: calc(var(--w) * 0.14);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.card-sm .card-name { font-size: calc(var(--w) * 0.19); }
+.card-lg .card-name { flex: none; padding-top: 5px; color: var(--c); }
+.card-role { flex: 1; display: flex; align-items: center; padding: 0 3px; font-size: calc(var(--w) * 0.095); color: var(--fg); line-height: 1.15; }
+.card.is-dead { filter: grayscale(1) brightness(0.55); animation: glitch 0.45s steps(6); }
+@keyframes glitch {
+  0% { filter: none; transform: translate(0); }
+  20% { filter: hue-rotate(90deg) saturate(3); transform: translate(-3px, 1px) skewX(8deg); }
+  40% { filter: invert(1); transform: translate(3px, -1px); }
+  60% { filter: hue-rotate(-90deg) saturate(3); transform: translate(-2px, 0) skewX(-8deg); }
+  80% { filter: grayscale(1) brightness(1.4); transform: translate(2px, 1px); }
+}
 .card.is-dead .card-front::after {
   content: '✕';
   position: absolute;
@@ -192,6 +241,18 @@ b { color: #fff; }
 .log-bad { color: var(--danger); }
 .log-win { color: var(--accent); font-weight: 700; }
 .log-private { color: #ff8a50; }
+
+.tracker { padding: 8px 12px; border-bottom: 2px solid var(--line); display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; }
+.tracker-row { display: grid; grid-template-columns: 22px 1fr auto 34px; align-items: center; gap: 8px; }
+.tracker-art { width: 22px; height: 22px; background: color-mix(in srgb, var(--c) 25%, #0b0f16); border: 1px solid var(--c); }
+.tracker-name { color: var(--c); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pips { display: flex; gap: 3px; }
+.pip { width: 9px; height: 13px; border: 1px solid var(--c); background: color-mix(in srgb, var(--c) 30%, transparent); }
+.pip.is-mine { background: var(--c); }
+.pip.is-out { border-color: var(--dim); background: none; position: relative; opacity: 0.6; }
+.pip.is-out::after { content: ''; position: absolute; inset: 5px -1px auto -1px; height: 1px; background: var(--danger); transform: rotate(-50deg); }
+.tracker-count { text-align: right; color: var(--fg); }
+.tracker-legend { color: var(--dim); font-size: 11.5px; margin-top: 2px; }
 
 /* ───────── mesa ───────── */
 
@@ -383,7 +444,8 @@ button.seat { cursor: crosshair; }
 
 @media (max-width: 900px) {
   .game-body { grid-template-columns: minmax(0, 1fr); }
-  .game-side { border-left: 0; border-top: 2px solid var(--line); position: static; max-height: 220px; }
+  .game-side { border-left: 0; border-top: 2px solid var(--line); position: static; max-height: none; }
+  .log { max-height: 200px; }
 }
 
 @media (max-width: 620px) {

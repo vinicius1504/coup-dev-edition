@@ -19,8 +19,13 @@ export function createGame(config: GameConfig): GameState {
   const first = config.firstPlayer ?? 0;
   if (!Number.isInteger(first) || first < 0 || first >= n) throw new Error('firstPlayer inválido');
 
+  const copies = config.copies ?? COPIES_PER_CHARACTER;
+  // precisa sobrar carta para distribuir 2 por jogador
+  if (!Number.isInteger(copies) || copies < 1 || BASE_CHARACTERS.length * copies + 1 < n * STARTING_INFLUENCES) {
+    throw new Error(`Número de cópias inválido: ${copies}`);
+  }
   const chars: Character[] = [];
-  for (const c of BASE_CHARACTERS) for (let i = 0; i < COPIES_PER_CHARACTER; i++) chars.push(c);
+  for (const c of BASE_CHARACTERS) for (let i = 0; i < copies; i++) chars.push(c);
   chars.push('ia');
 
   let rng = config.seed | 0;

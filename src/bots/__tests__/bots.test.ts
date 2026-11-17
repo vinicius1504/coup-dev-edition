@@ -4,11 +4,12 @@ import type { BotDifficulty, GameState, IaMode } from '@/engine';
 import { rig } from '@/engine/__tests__/helpers';
 import { decide, thinkingTime } from '..';
 
-function play(difficulties: BotDifficulty[], seed: number, iaMode: IaMode = 'balanced'): GameState {
+function play(difficulties: BotDifficulty[], seed: number, iaMode: IaMode = 'balanced', copies?: number): GameState {
   let s = createGame({
     players: difficulties.map((d, i) => ({ name: `B${i}`, kind: 'bot' as const, difficulty: d })),
     iaMode,
     seed,
+    ...(copies ? { copies } : {}),
     firstPlayer: seed % difficulties.length,
   });
   const rand = makeRng(seed * 31 + 7);
@@ -31,6 +32,14 @@ describe('bots', () => {
       const n = 2 + (seed % 5);
       const diffs = Array.from({ length: n }, (_, i) => levels[(seed + i) % 3]!);
       const s = play(diffs, seed, seed % 2 ? 'chaos' : 'balanced');
+      expect(winner(s)).not.toBeNull();
+    }
+  });
+
+  it('também terminam partidas com baralho proporcional', () => {
+    for (let seed = 0; seed < 40; seed++) {
+      const n = 2 + (seed % 5);
+      const s = play(Array.from({ length: n }, () => (seed % 2 ? 'hard' : 'medium') as BotDifficulty), seed, 'balanced', n - 1);
       expect(winner(s)).not.toBeNull();
     }
   });
