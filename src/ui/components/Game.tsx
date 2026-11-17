@@ -5,7 +5,7 @@ import { currentActor, legalCommands, toView } from '@/engine';
 import type { Command, GameConfig, GameState, PlayerId } from '@/engine';
 import { playSfx } from '@/lib/sounds';
 import { useGame } from '../hooks/useGame';
-import { bubbleFor } from '../text';
+import { bubbleFor, describeNow } from '../text';
 import { ActionPanel } from './ActionPanel';
 import type { Choice } from './ActionPanel';
 import { DeckTracker } from './DeckTracker';
@@ -43,6 +43,9 @@ export function Game({ config, timer, sound, onToggleSound, onFinish, onQuit }: 
   const me = view.players.find((p) => p.id === HUMAN)!;
   const over = view.phase.kind === 'gameOver';
 
+  const nameRef = useRef(name);
+  nameRef.current = name;
+  const now = describeNow(view, name);
   const soundRef = useRef(sound);
   soundRef.current = sound;
 
@@ -53,7 +56,7 @@ export function Game({ config, timer, sound, onToggleSound, onFinish, onQuit }: 
     const sfx = (n: Parameters<typeof playSfx>[0]) => soundRef.current && !fast && playSfx(n);
     let coin = false;
     for (const e of batch.events) {
-      const b = bubbleFor(e);
+      const b = bubbleFor(e, nameRef.current);
       if (b) {
         setBubbles((prev) => ({ ...prev, [b.playerId]: { text: b.text, key: e.seq } }));
         timers.push(setTimeout(() => setBubbles((prev) => (prev[b.playerId]?.key === e.seq ? { ...prev, [b.playerId]: undefined } : prev)), 2600));
@@ -129,6 +132,10 @@ export function Game({ config, timer, sound, onToggleSound, onFinish, onQuit }: 
             }}
           />
           <div className="dock">
+            <div className="now" aria-live="polite">
+              <p className="now-main">{now.main}</p>
+              {now.detail && <p className="now-detail">{now.detail}</p>}
+            </div>
             {error && (
               <p className="error" role="alert">
                 {error}
@@ -146,7 +153,7 @@ export function Game({ config, timer, sound, onToggleSound, onFinish, onQuit }: 
             ) : myMove && view.phase.kind === 'action' ? (
               <ActionPanel view={view} legal={legal} choice={choice} onChoice={setChoice} onCommand={send} />
             ) : (
-              <section className="panel panel-idle" aria-live="polite">
+              <section className="panel panel-idle">
                 <p className="panel-title">{status}</p>
               </section>
             )}

@@ -1,5 +1,5 @@
 import { ACTIONS, BLOCK_NAMES, CHARACTERS } from '@/engine/constants';
-import type { ActionType, GameEvent, PendingAction, PlayerId } from '@/engine/types';
+import type { ActionType, GameEvent, GameView, LossReason, PendingAction, PlayerId } from '@/engine/types';
 
 export type Names = (id: PlayerId) => string;
 
@@ -20,6 +20,39 @@ export function describeAction(pa: Pick<PendingAction, 'type' | 'actor' | 'targe
   if (pa.viaPrompt) s += ' via Prompt da IA';
   if (pa.target) s += ` em ${name(pa.target)}`;
   return s;
+}
+
+export const LOSS_CAUSE: Record<LossReason, string> = {
+  challengeLost: 'errou o desafio',
+  bluffCaught: 'blefe pego',
+  exploit: 'sofreu Exploit',
+  deploy: 'sofreu Deploy na sexta',
+};
+
+/** Resumo do que está acontecendo agora: quem age, em quem, e de quem é a vez de responder. */
+export function describeNow(view: GameView, name: Names): { main: string; detail: string } {
+  const ph = view.phase;
+  const pa = view.pending;
+  if (ph.kind === 'gameOver') return { main: `${name(ph.winner)} venceu.`, detail: '' };
+  if (!pa) return { main: `Vez de ${name(view.activePlayer)} escolher uma ação.`, detail: '' };
+  const main = describeAction(pa, name) + (pa.claim ? `, alegando ${CHARACTERS[pa.claim].name}` : '') + '.';
+  switch (ph.kind) {
+    case 'actionChallenge':
+      return { main, detail: `Desafio: ${name(ph.pending[0]!)} decide se desafia ${name(pa.actor)}.` };
+    case 'block':
+      return { main, detail: `Bloqueio: ${name(ph.pending[0]!)} decide se bloqueia ${name(pa.actor)}.` };
+    case 'blockChallenge':
+      return {
+        main,
+        detail: `${name(pa.block!.blocker)} bloqueou ${name(pa.actor)} alegando ${CHARACTERS[pa.block!.character].name}. ${name(ph.pending[0]!)} decide se desafia ${name(pa.block!.blocker)}.`,
+      };
+    case 'loseInfluence':
+      return { main, detail: `${name(ph.playerId)} escolhe qual carta perder (${LOSS_CAUSE[ph.reason]}).` };
+    case 'exchange':
+      return { main, detail: `${name(ph.playerId)} escolhe quais cartas manter.` };
+    default:
+      return { main, detail: '' };
+  }
 }
 
 export type LogTone = 'sys' | 'turn' | 'act' | 'coin' | 'fight' | 'bad' | 'win' | 'private';
@@ -65,7 +98,7 @@ export function eventText(e: GameEvent, name: Names): { text: string; tone: LogT
     case 'ACTION_RESOLVED':
       return null;
     case 'INFLUENCE_LOST':
-      return { text: `${name(e.playerId)} perde uma influência: ${CHARACTERS[e.character].name}`, tone: 'bad' };
+      return { text: `${name(e.playerId)} perde uma influência (${LOSS_CAUSE[e.reason]}): ${CHARACTERS[e.character].name}`, tone: 'bad' };
     case 'PLAYER_ELIMINATED':
       return { text: `${name(e.playerId)} foi eliminado. Processo encerrado com código 1.`, tone: 'bad' };
     case 'EXCHANGE_STARTED':
@@ -81,15 +114,15 @@ export function eventText(e: GameEvent, name: Names): { text: string; tone: LogT
   }
 }
 
-/** Texto curto para o balão sobre o jogador. */
-export function bubbleFor(e: GameEvent): { playerId: PlayerId; text: string } | null {
+/** Texto curto para o balão sobre o jogador, sempre dizendo em quem. */
+export function bubbleFor(e: GameEvent, name: Names): { playerId: PlayerId; text: string } | null {
   switch (e.type) {
     case 'ACTION_DECLARED':
-      return { playerId: e.actor, text: (e.viaPrompt ? 'Prompt: ' : '') + ACTIONS[e.action].name };
+      return { playerId: e.actor, text: (e.viaPrompt ? 'Prompt: ' : '') + ACTIONS[e.action].name + (e.target ? ` → ${name(e.target)}` : '') };
     case 'CHALLENGE_DECLARED':
-      return { playerId: e.challenger, text: 'Desafio!' };
+      return { playerId: e.challenger, text: `Desafio ${name(e.claimant)}!` };
     case 'BLOCK_DECLARED':
-      return { playerId: e.blocker, text: `Bloqueio: ${BLOCK_NAMES[e.character]}` };
+      return { playerId: e.blocker, text: `Bloqueio ${name(e.actor)}: ${BLOCK_NAMES[e.character]}` };
     case 'IA_REVEALED':
       return { playerId: e.playerId, text: 'Era a IA!' };
     default:

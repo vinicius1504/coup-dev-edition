@@ -49,63 +49,72 @@ export function Menu({ settings, onChange, onStart, onRules }: Props) {
           onStart();
         }}
       >
-        <label className="field">
-          <span className="field-label">seu nome</span>
-          <input className="input" value={settings.name} maxLength={12} onChange={(e) => set('name', e.target.value)} spellCheck={false} />
-        </label>
-        <Segmented
-          label={`jogadores: você + ${settings.bots} bot${settings.bots > 1 ? 's' : ''}`}
-          value={settings.bots + 1}
-          options={[2, 3, 4, 5, 6].map((n) => [n, String(n)] as [number, string])}
-          onChange={(n) => set('bots', n - 1)}
-        />
-        <Segmented
-          label="dificuldade dos bots"
-          value={settings.difficulty}
-          options={[
-            ['easy', 'fácil'],
-            ['medium', 'médio'],
-            ['hard', 'difícil'],
-            ['mixed', 'misto'],
-          ]}
-          onChange={(v) => set('difficulty', v)}
-        />
-        <Segmented
-          label="modo da IA"
-          value={settings.iaMode}
-          options={[
-            ['balanced', 'equilibrado'],
-            ['chaos', 'caos'],
-          ]}
-          onChange={(v) => set('iaMode', v)}
-        />
-        <p className="hint">
-          {settings.iaMode === 'balanced'
-            ? 'Prompt custa 1 token extra. Depois de 2 usos, a IA volta ao baralho.'
-            : 'Prompt grátis. Depois de usar, a IA é revelada e embaralhada de volta.'}
-        </p>
-        <Segmented
-          label="baralho"
-          value={settings.deck}
-          options={[
-            ['classic', 'clássico'],
-            ['scaled', 'proporcional'],
-          ]}
-          onChange={(v) => set('deck', v)}
-        />
-        <p className="hint">
-          {settings.deck === 'classic' ? '3 cópias de cada personagem, com qualquer número de jogadores.' : 'Cópias de cada personagem = jogadores − 1.'} Nesta
-          partida: {deckCopies(settings)} de cada + 1 IA = {deckCopies(settings) * 5 + 1} cartas.
-        </p>
-        <div className="checks">
-          <label className="toggle">
-            <input type="checkbox" checked={settings.timer} onChange={(e) => set('timer', e.target.checked)} />
-            timer de 10s nas janelas
+        <div className="form-grid">
+          <label className="field">
+            <span className="field-label">seu nome</span>
+            <input className="input" value={settings.name} maxLength={12} onChange={(e) => set('name', e.target.value)} spellCheck={false} />
           </label>
-          <label className="toggle">
-            <input type="checkbox" checked={settings.sound} onChange={(e) => set('sound', e.target.checked)} />
-            sons
-          </label>
+          <Segmented
+            label={`jogadores: você + ${settings.bots} bot${settings.bots > 1 ? 's' : ''}`}
+            value={settings.bots + 1}
+            options={[2, 3, 4, 5, 6].map((n) => [n, String(n)] as [number, string])}
+            onChange={(n) => set('bots', n - 1)}
+          />
+          <Segmented
+            label="dificuldade dos bots"
+            value={settings.difficulty}
+            options={[
+              ['easy', 'fácil'],
+              ['medium', 'médio'],
+              ['hard', 'difícil'],
+              ['mixed', 'misto'],
+            ]}
+            onChange={(v) => set('difficulty', v)}
+          />
+          <div className="field">
+            <span className="field-label">extras</span>
+            <div className="checks">
+              <label className="toggle">
+                <input type="checkbox" checked={settings.timer} onChange={(e) => set('timer', e.target.checked)} />
+                timer de 10s
+              </label>
+              <label className="toggle">
+                <input type="checkbox" checked={settings.sound} onChange={(e) => set('sound', e.target.checked)} />
+                sons
+              </label>
+            </div>
+          </div>
+          <div className="cell">
+            <Segmented
+              label="modo da IA"
+              value={settings.iaMode}
+              options={[
+                ['balanced', 'equilibrado'],
+                ['chaos', 'caos'],
+              ]}
+              onChange={(v) => set('iaMode', v)}
+            />
+            <p className="hint">
+              {settings.iaMode === 'balanced'
+                ? 'Prompt custa 1 token extra. Depois de 2 usos, a IA volta ao baralho.'
+                : 'Prompt grátis. Depois de usar, a IA é revelada e embaralhada de volta.'}
+            </p>
+          </div>
+          <div className="cell">
+            <Segmented
+              label="baralho"
+              value={settings.deck}
+              options={[
+                ['classic', 'clássico'],
+                ['scaled', 'proporcional'],
+              ]}
+              onChange={(v) => set('deck', v)}
+            />
+            <p className="hint">
+              {settings.deck === 'classic' ? '3 cópias de cada personagem.' : 'Cópias de cada = jogadores − 1.'} Nesta partida: {deckCopies(settings)} de cada + 1 IA ={' '}
+              {deckCopies(settings) * 5 + 1} cartas.
+            </p>
+          </div>
         </div>
         <button type="submit" className="btn btn-primary btn-big">
           ▶ npm run coup
