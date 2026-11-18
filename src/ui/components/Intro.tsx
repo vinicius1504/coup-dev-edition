@@ -12,7 +12,7 @@ interface Props {
 }
 
 const COMMAND = 'npm run coup';
-const WALK_MS = 3000;
+const WALK_MS = 3400;
 const STEP_MS = 430;
 
 interface Node {
@@ -110,6 +110,9 @@ export function Intro({ config, sound, onDone }: Props) {
   const [lines, setLines] = useState(0);
   const [mouse, setMouse] = useState({ x: 0, y: 0, shown: false, down: false });
   const hostRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // 3d = cena Three.js; flat = quarto em SVG (sem WebGL ou se a cena falhar)
+  const [mode, setMode] = useState<'loading' | '3d' | 'flat'>('loading');
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
   const soundRef = useRef(sound);
@@ -127,6 +130,24 @@ export function Intro({ config, sound, onDone }: Props) {
   const outputCount = output.length;
 
   useEffect(() => {
+    let handle: { dispose: () => void } | null = null;
+    let cancelled = false;
+    import('../intro3d')
+      .then(({ mountRoom }) => {
+        if (cancelled || !canvasRef.current) return;
+        handle = mountRoom(canvasRef.current, { walkMs: WALK_MS, onStep: () => soundRef.current && playSfx('step') });
+        setMode('3d');
+      })
+      .catch(() => !cancelled && setMode('flat'));
+    return () => {
+      cancelled = true;
+      handle?.dispose();
+    };
+  }, []);
+
+  const ready = mode !== 'loading';
+  useEffect(() => {
+    if (!ready) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
     const at = (ms: number, fn: () => void) => timers.push(setTimeout(fn, ms));
     const sfx = (name: Parameters<typeof playSfx>[0]) => soundRef.current && playSfx(name);
@@ -154,7 +175,7 @@ export function Intro({ config, sound, onDone }: Props) {
       },
     ];
 
-    for (let t = 200; t < WALK_MS - 300; t += STEP_MS) at(t, () => sfx('step'));
+    if (mode === 'flat') for (let t = 200; t < WALK_MS - 300; t += STEP_MS) at(t, () => sfx('step'));
     at(WALK_MS, () => setStage(1));
 
     // o cursor vai até cada alvo e clica
@@ -195,7 +216,7 @@ export function Intro({ config, sound, onDone }: Props) {
     });
     at(end + 550, () => doneRef.current());
     return () => timers.forEach(clearTimeout);
-  }, [outputCount]);
+  }, [outputCount, ready, mode]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -213,6 +234,8 @@ export function Intro({ config, sound, onDone }: Props) {
 
   return (
     <div className={`intro intro-s${stage}`} aria-label="Abertura da partida" ref={hostRef}>
+      <canvas ref={canvasRef} className={`intro-3d ${mode === '3d' ? 'is-on' : ''}`} aria-hidden />
+      {mode === 'flat' && (
       <div className="intro-bob">
         <svg className="intro-room" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" shapeRendering="crispEdges" aria-hidden>
           {/* parede e piso */}
@@ -286,6 +309,7 @@ export function Intro({ config, sound, onDone }: Props) {
           <rect x="132" y="132" width="56" height="6" fill="#0d121b" />
         </svg>
       </div>
+      )}
 
       <div className="intro-editor" aria-hidden={stage < 1}>
         <div className="ed-title">
