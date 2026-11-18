@@ -1,4 +1,4 @@
-export type Sfx = 'coin' | 'declare' | 'challenge' | 'block' | 'lose' | 'win' | 'defeat' | 'turn';
+export type Sfx = 'step' | 'key' | 'coin' | 'declare' | 'challenge' | 'block' | 'lose' | 'win' | 'defeat' | 'turn';
 
 let ctx: AudioContext | null = null;
 
@@ -17,6 +17,8 @@ function tone(freq: number, start: number, dur: number, type: OscillatorType = '
 }
 
 const PATTERNS: Record<Sfx, [number, number, number][]> = {
+  step: [[82, 0, 0.07]],
+  key: [[1400, 0, 0.015]],
   coin: [[988, 0, 0.06], [1319, 0.06, 0.12]],
   declare: [[440, 0, 0.07]],
   challenge: [[330, 0, 0.09], [262, 0.09, 0.16]],

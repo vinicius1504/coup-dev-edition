@@ -11,9 +11,11 @@ export interface Settings {
   deck: 'classic' | 'scaled';
   timer: boolean;
   sound: boolean;
+  /** Mostra a abertura (andar até o PC) antes da partida. */
+  intro: boolean;
 }
 
-export const DEFAULT_SETTINGS: Settings = { name: 'você', bots: 3, difficulty: 'medium', iaMode: 'balanced', deck: 'classic', timer: false, sound: true };
+export const DEFAULT_SETTINGS: Settings = { name: 'você', bots: 3, difficulty: 'medium', iaMode: 'balanced', deck: 'classic', timer: false, sound: true, intro: true };
 
 const KEY = 'coup-dev-edition:settings:v1';
 const BOT_NAMES = ['root', 'segfault', 'nullptr', 'sudo', 'grep'];

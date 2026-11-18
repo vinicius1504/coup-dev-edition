@@ -82,6 +82,10 @@ export function Menu({ settings, onChange, onStart, onRules }: Props) {
                 <input type="checkbox" checked={settings.sound} onChange={(e) => set('sound', e.target.checked)} />
                 sons
               </label>
+              <label className="toggle">
+                <input type="checkbox" checked={settings.intro} onChange={(e) => set('intro', e.target.checked)} />
+                abertura
+              </label>
             </div>
           </div>
           <div className="cell">
@@ -117,7 +121,7 @@ export function Menu({ settings, onChange, onStart, onRules }: Props) {
           </div>
         </div>
         <button type="submit" className="btn btn-primary btn-big">
-          ▶ npm run coup
+          ▶ {settings.intro ? 'ir para o PC' : 'npm run coup'}
         </button>
         <div className="btn-row">
           <button type="button" className="btn" onClick={() => onRules('tutorial')}>
